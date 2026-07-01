@@ -1,0 +1,8 @@
+{
+  "name": "sample-shop",
+  "version": "0.3.2",
+  "private": true,
+  "description": "Fixture repository consumed by Kyndro analysis packets. A tiny e-commerce checkout domain. No dependencies by design.",
+  "type": "module",
+  "main": "src/index.ts"
+}

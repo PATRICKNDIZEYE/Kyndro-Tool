@@ -1,0 +1,47 @@
+{
+  "version": "1.0.0",
+  "description": "Golden fixture manifest — maps each fixture payload to the contract schema it must satisfy. Consumed by fixtures/validate.py.",
+  "cases": [
+    {
+      "file": "analyzed-pr/run-pr42.json",
+      "schema": "openapi:#/components/schemas/RunDetail"
+    },
+    {
+      "file": "repos/repo-shop.json",
+      "schema": "openapi:#/components/schemas/Repo"
+    },
+    {
+      "file": "obligations/obligation-verified.json",
+      "schema": "openapi:#/components/schemas/Obligation"
+    },
+    {
+      "file": "obligations/obligation-falsified.json",
+      "schema": "openapi:#/components/schemas/Obligation"
+    },
+    {
+      "file": "obligations/obligation-unknown.json",
+      "schema": "openapi:#/components/schemas/Obligation"
+    },
+    {
+      "file": "counterexamples/counterexample-negative-total.json",
+      "schema": "openapi:#/components/schemas/Counterexample"
+    },
+    {
+      "file": "specs/candidate-specs.json",
+      "schema": "openapi:#/components/schemas/Spec",
+      "each": true
+    },
+    {
+      "file": "events/run.started.json",
+      "schema": "events/run.started.schema.json"
+    },
+    {
+      "file": "events/run.updated.json",
+      "schema": "events/run.updated.schema.json"
+    },
+    {
+      "file": "events/run.completed.json",
+      "schema": "events/run.completed.schema.json"
+    }
+  ]
+}
