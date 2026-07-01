@@ -5,19 +5,19 @@ Work through top to bottom; §1–§3 are needed before W1 opens, §4–§6 befo
 
 ---
 
-## 1. Create the GitHub repository and push
+## 1. Create the GitHub repository and push — ✅ DONE 2026-07-02
 
-The local repo exists on branch `bootstrap/w0`. No remote is configured.
+You created https://github.com/PATRICKNDIZEYE/Kyndro-Tool and pushed `main` yourself
+(root commit `549f3b7`). Two follow-ups only you can do:
 
 ```bash
-cd /Users/sshazul/Documents/Fable-Eval
-gh repo create kyndro --private --source=. --remote=origin
-git push -u origin main
-git push -u origin bootstrap/w0
+# your commits are currently authored as "SSH Azul <sshazul@192.168.1.76>" — fix once:
+git config --global user.name "Your Name"
+git config --global user.email "you@example.com"
 ```
 
-(If ORCH already created the repo/PR with your approval, skip this and verify at
-https://github.com/<owner>/kyndro.)
+Also check the repo is **private** (Settings → General → Danger Zone) — making it public
+is a G-PUB decision.
 
 ## 2. Branch protection on `main` — agents never merge
 
@@ -25,7 +25,7 @@ Do this BEFORE approving any agent PR. This is the mechanism behind PLAN.md §1 
 first NEVER in §6 — politeness does not enforce it, this does.
 
 ```bash
-gh api -X PUT "repos/{owner}/kyndro/branches/main/protection" \
+gh api -X PUT "repos/PATRICKNDIZEYE/Kyndro-Tool/branches/main/protection" \
   -H "Accept: application/vnd.github+json" \
   --input - <<'JSON'
 {
@@ -47,11 +47,13 @@ Notes:
   lands, apply the block WITHOUT `required_status_checks` (set it to `null`), then re-run the
   full command after W1-PLAT-2 merges.
 - If agents ever get their own machine accounts, do NOT grant them merge rights; PRs only.
-- UI alternative: https://github.com/<owner>/kyndro/settings/branches → Add rule for `main`.
+- UI alternative: https://github.com/PATRICKNDIZEYE/Kyndro-Tool/settings/branches → Add rule for `main`.
+- W0 landed on `main` via your direct push before protection existed — that door closes the
+  moment you apply this rule; from then on everything (humans included) goes through PRs.
 
 ## 3. Repo secrets — NAMES only, you supply the values
 
-Set at https://github.com/<owner>/kyndro/settings/secrets/actions
+Set at https://github.com/PATRICKNDIZEYE/Kyndro-Tool/settings/secrets/actions
 (or `gh secret set <NAME>` and paste the value when prompted). Never let a value into the
 repo, a fixture, a packet, or a chat with an agent.
 
