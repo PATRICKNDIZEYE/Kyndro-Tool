@@ -1,0 +1,758 @@
+# Kyndro API contract v1 — frozen at gate G-CONTRACT.
+# Owner: BE-PLAT (contract-change tasks only). Everyone else reads.
+# Validate: npx --yes @redocly/cli@1.34.3 lint --config contract/redocly.yaml contract/openapi.yaml
+openapi: 3.1.0
+info:
+  title: Kyndro API
+  version: 1.0.0
+  summary: Code-verification platform API — v1 surface (auth, repos, runs, obligations, specs).
+  description: >
+    Contract-first API for Kyndro. Backend implements against this document;
+    frontend builds on top of it via generated mocks and @kyndro/types.
+    Changes require a contract-change task and the G-CONTRACT human gate.
+  license:
+    name: Proprietary
+    url: https://kyndro.app/terms
+servers:
+  - url: https://api.kyndro.app/v1
+    description: Production
+  - url: http://localhost:4010/v1
+    description: Local Prism mock server
+security:
+  - bearerAuth: []
+tags:
+  - name: auth
+    description: Token exchange and identity.
+  - name: repos
+    description: Repositories connected via the GitHub App.
+  - name: runs
+    description: Verification runs and their obligations.
+  - name: specs
+    description: Candidate and accepted specs.
+
+paths:
+  /auth/github:
+    post:
+      operationId: exchangeGithubCode
+      tags: [auth]
+      summary: Exchange a GitHub OAuth authorization code for a Kyndro API token.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [code]
+              properties:
+                code:
+                  type: string
+                  description: GitHub OAuth authorization code. Never logged.
+      responses:
+        "200":
+          description: Token issued.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthSession"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /auth/me:
+    get:
+      operationId: getCurrentUser
+      tags: [auth]
+      summary: Identity of the caller behind the presented bearer token.
+      responses:
+        "200":
+          description: The authenticated user.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /repos:
+    get:
+      operationId: listRepos
+      tags: [repos]
+      summary: List repositories connected to the caller's account.
+      parameters:
+        - $ref: "#/components/parameters/Cursor"
+        - $ref: "#/components/parameters/Limit"
+      responses:
+        "200":
+          description: Page of connected repositories.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, next_cursor]
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Repo"
+                  next_cursor:
+                    $ref: "#/components/schemas/NextCursor"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /runs:
+    get:
+      operationId: listRuns
+      tags: [runs]
+      summary: List verification runs, newest first.
+      parameters:
+        - name: repo_id
+          in: query
+          required: false
+          description: Filter to a single repository.
+          schema:
+            $ref: "#/components/schemas/RepoId"
+        - name: status
+          in: query
+          required: false
+          description: Filter by run status.
+          schema:
+            $ref: "#/components/schemas/RunStatus"
+        - $ref: "#/components/parameters/Cursor"
+        - $ref: "#/components/parameters/Limit"
+      responses:
+        "200":
+          description: Page of runs.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, next_cursor]
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Run"
+                  next_cursor:
+                    $ref: "#/components/schemas/NextCursor"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+    post:
+      operationId: createRun
+      tags: [runs]
+      summary: Trigger a verification run for a commit range.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [repo_id, head_sha, base_sha]
+              properties:
+                repo_id:
+                  $ref: "#/components/schemas/RepoId"
+                head_sha:
+                  $ref: "#/components/schemas/GitSha"
+                base_sha:
+                  $ref: "#/components/schemas/GitSha"
+                pr_number:
+                  type: integer
+                  minimum: 1
+                  description: Present when the run is tied to a pull request.
+      responses:
+        "202":
+          description: Run accepted and queued.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Run"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /runs/{runId}:
+    get:
+      operationId: getRun
+      tags: [runs]
+      summary: Fetch one run with its analysis summary.
+      parameters:
+        - $ref: "#/components/parameters/RunId"
+      responses:
+        "200":
+          description: Run detail.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RunDetail"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /runs/{runId}/obligations:
+    get:
+      operationId: listRunObligations
+      tags: [runs]
+      summary: List the obligations produced by a run.
+      parameters:
+        - $ref: "#/components/parameters/RunId"
+        - name: verdict
+          in: query
+          required: false
+          description: Filter by verdict.
+          schema:
+            $ref: "#/components/schemas/Verdict"
+        - $ref: "#/components/parameters/Cursor"
+        - $ref: "#/components/parameters/Limit"
+      responses:
+        "200":
+          description: Page of obligations.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, next_cursor]
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Obligation"
+                  next_cursor:
+                    $ref: "#/components/schemas/NextCursor"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /specs:
+    get:
+      operationId: listSpecs
+      tags: [specs]
+      summary: List candidate and accepted specs.
+      parameters:
+        - name: repo_id
+          in: query
+          required: false
+          description: Filter to a single repository.
+          schema:
+            $ref: "#/components/schemas/RepoId"
+        - name: status
+          in: query
+          required: false
+          description: Filter by review status.
+          schema:
+            $ref: "#/components/schemas/SpecStatus"
+        - $ref: "#/components/parameters/Cursor"
+        - $ref: "#/components/parameters/Limit"
+      responses:
+        "200":
+          description: Page of specs.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, next_cursor]
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Spec"
+                  next_cursor:
+                    $ref: "#/components/schemas/NextCursor"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      description: >
+        Opaque Kyndro API token obtained from POST /auth/github (ADR-004).
+        Presented as `Authorization: Bearer <token>`. Tokens are opaque:
+        clients must not parse them.
+
+  parameters:
+    Cursor:
+      name: cursor
+      in: query
+      required: false
+      description: Opaque pagination cursor from a previous response (ADR-002).
+      schema:
+        type: string
+    Limit:
+      name: limit
+      in: query
+      required: false
+      description: Page size.
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 30
+    RunId:
+      name: runId
+      in: path
+      required: true
+      description: Run identifier.
+      schema:
+        $ref: "#/components/schemas/RunId"
+
+  responses:
+    BadRequest:
+      description: Malformed request.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorEnvelope"
+    Unauthorized:
+      description: Missing or invalid bearer token.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorEnvelope"
+    NotFound:
+      description: Resource does not exist or is not visible to the caller.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorEnvelope"
+
+  schemas:
+    # ---- primitives -------------------------------------------------------
+    RepoId:
+      type: string
+      description: Repo identifier — `repo_` + 26-char Crockford-base32 ULID (ADR-001).
+      pattern: "^repo_[0-9a-hjkmnp-tv-z]{26}$"
+    RunId:
+      type: string
+      description: Run identifier (ADR-001).
+      pattern: "^run_[0-9a-hjkmnp-tv-z]{26}$"
+    ObligationId:
+      type: string
+      description: Obligation identifier (ADR-001).
+      pattern: "^obl_[0-9a-hjkmnp-tv-z]{26}$"
+    SpecId:
+      type: string
+      description: Spec identifier (ADR-001).
+      pattern: "^spec_[0-9a-hjkmnp-tv-z]{26}$"
+    CounterexampleId:
+      type: string
+      description: Counterexample identifier (ADR-001).
+      pattern: "^cex_[0-9a-hjkmnp-tv-z]{26}$"
+    UserId:
+      type: string
+      description: User identifier (ADR-001).
+      pattern: "^user_[0-9a-hjkmnp-tv-z]{26}$"
+    GitSha:
+      type: string
+      description: Full 40-character git commit SHA.
+      pattern: "^[0-9a-f]{40}$"
+    Timestamp:
+      type: string
+      format: date-time
+      description: RFC 3339 UTC timestamp.
+    NextCursor:
+      type: [string, "null"]
+      description: Cursor for the next page, or null when this is the last page (ADR-002).
+
+    # ---- errors (ADR-003) -------------------------------------------------
+    ErrorEnvelope:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: object
+          required: [code, message]
+          properties:
+            code:
+              type: string
+              description: Stable machine-readable code, SCREAMING_SNAKE_CASE.
+              pattern: "^[A-Z][A-Z0-9_]*$"
+            message:
+              type: string
+              description: Human-readable explanation. Not stable; do not parse.
+            details:
+              type: object
+              description: Optional structured context (field errors, ids).
+              additionalProperties: true
+
+    # ---- auth (ADR-004) ---------------------------------------------------
+    AuthSession:
+      type: object
+      required: [token, user]
+      properties:
+        token:
+          type: object
+          required: [access_token, token_type, expires_at]
+          properties:
+            access_token:
+              type: string
+              description: Opaque bearer token. Store securely; never logged.
+            token_type:
+              type: string
+              const: bearer
+            expires_at:
+              $ref: "#/components/schemas/Timestamp"
+        user:
+          $ref: "#/components/schemas/User"
+    User:
+      type: object
+      required: [id, github_login, created_at]
+      properties:
+        id:
+          $ref: "#/components/schemas/UserId"
+        github_login:
+          type: string
+          description: GitHub username of the authenticated user.
+        display_name:
+          type: [string, "null"]
+        avatar_url:
+          type: [string, "null"]
+          format: uri
+        created_at:
+          $ref: "#/components/schemas/Timestamp"
+
+    # ---- repos ------------------------------------------------------------
+    Repo:
+      type: object
+      required: [id, owner, name, default_branch, status, connected_at]
+      properties:
+        id:
+          $ref: "#/components/schemas/RepoId"
+        owner:
+          type: string
+          description: GitHub org or user that owns the repository.
+        name:
+          type: string
+        default_branch:
+          type: string
+        status:
+          type: string
+          enum: [active, suspended]
+          description: suspended = GitHub App uninstalled or access revoked.
+        latest_run_id:
+          oneOf:
+            - $ref: "#/components/schemas/RunId"
+            - type: "null"
+        connected_at:
+          $ref: "#/components/schemas/Timestamp"
+
+    # ---- runs ---------------------------------------------------------------
+    RunStatus:
+      type: string
+      enum: [queued, running, completed, failed]
+      description: >
+        Run lifecycle. `failed` means the run itself errored (infrastructure,
+        checkout, analysis crash) — it is NOT a verdict. Verdicts live on
+        obligations.
+    VerdictCounts:
+      type: object
+      description: Obligation tally by verdict. All zeros until execution starts.
+      required: [verified, falsified, unknown]
+      properties:
+        verified:
+          type: integer
+          minimum: 0
+        falsified:
+          type: integer
+          minimum: 0
+        unknown:
+          type: integer
+          minimum: 0
+    PullRequestRef:
+      type: object
+      description: The pull request that triggered a run, when there is one.
+      required: [number, title, author_login]
+      properties:
+        number:
+          type: integer
+          minimum: 1
+        title:
+          type: string
+        author_login:
+          type: string
+        url:
+          type: string
+          format: uri
+    Run:
+      type: object
+      required:
+        [id, repo_id, status, trigger, head_sha, base_sha, obligation_count,
+         verdict_counts, created_at, started_at, completed_at]
+      properties:
+        id:
+          $ref: "#/components/schemas/RunId"
+        repo_id:
+          $ref: "#/components/schemas/RepoId"
+        status:
+          $ref: "#/components/schemas/RunStatus"
+        trigger:
+          type: string
+          enum: [pull_request, manual]
+        pr:
+          oneOf:
+            - $ref: "#/components/schemas/PullRequestRef"
+            - type: "null"
+        head_sha:
+          $ref: "#/components/schemas/GitSha"
+        base_sha:
+          $ref: "#/components/schemas/GitSha"
+        obligation_count:
+          type: integer
+          minimum: 0
+        verdict_counts:
+          $ref: "#/components/schemas/VerdictCounts"
+        created_at:
+          $ref: "#/components/schemas/Timestamp"
+        started_at:
+          oneOf:
+            - $ref: "#/components/schemas/Timestamp"
+            - type: "null"
+        completed_at:
+          oneOf:
+            - $ref: "#/components/schemas/Timestamp"
+            - type: "null"
+    ChangedFunction:
+      type: object
+      required: [name, file, change_kind]
+      properties:
+        name:
+          type: string
+          description: Function or method name, `Class.method` for methods.
+        file:
+          type: string
+          description: Path relative to the repository root.
+        change_kind:
+          type: string
+          enum: [added, modified, removed]
+    BlastRadiusEntry:
+      type: object
+      description: A function that inherits obligations because it calls changed code.
+      required: [name, file, reason]
+      properties:
+        name:
+          type: string
+        file:
+          type: string
+        reason:
+          type: string
+          description: Human-readable why, e.g. "calls applyDiscount".
+    RunAnalysis:
+      type: object
+      description: Diff analysis summary attached to a run once analysis completes.
+      required: [files_changed, functions_changed, blast_radius]
+      properties:
+        files_changed:
+          type: integer
+          minimum: 0
+        functions_changed:
+          type: array
+          items:
+            $ref: "#/components/schemas/ChangedFunction"
+        blast_radius:
+          type: array
+          items:
+            $ref: "#/components/schemas/BlastRadiusEntry"
+    RunDetail:
+      allOf:
+        - $ref: "#/components/schemas/Run"
+        - type: object
+          required: [analysis]
+          properties:
+            analysis:
+              oneOf:
+                - $ref: "#/components/schemas/RunAnalysis"
+                - type: "null"
+
+    # ---- obligations & verdicts --------------------------------------------
+    Verdict:
+      type: string
+      enum: [VERIFIED, FALSIFIED, UNKNOWN]
+      description: >
+        Exactly three verdict states. VERIFIED is always bounded verification
+        and MUST carry BoundedVerification metadata. UNKNOWN is an honest,
+        acceptable verdict.
+    BoundedVerification:
+      type: object
+      description: Evidence for a bounded VERIFIED verdict.
+      required: [inputs_tested, seed, bounds]
+      properties:
+        inputs_tested:
+          type: integer
+          minimum: 1
+          description: Number of generated inputs executed against the property.
+        seed:
+          type: string
+          description: PRNG seed — replaying with this seed reproduces the exact inputs.
+        bounds:
+          type: string
+          description: >
+            Human-readable description of the explored input domain, e.g.
+            "quantities 0..1000, prices 0..10^6 cents, up to 50 cart lines".
+        duration_ms:
+          type: integer
+          minimum: 0
+    UnknownReason:
+      type: object
+      description: Why the engine could not decide. Required when verdict is UNKNOWN.
+      required: [code, message]
+      properties:
+        code:
+          type: string
+          enum: [unsupported_construct, timeout, external_effects, generator_unavailable]
+        message:
+          type: string
+    CounterexampleInput:
+      type: object
+      required: [name, value]
+      properties:
+        name:
+          type: string
+          description: Parameter name in the target function's signature.
+        value:
+          description: The generated value, as JSON. Any JSON type.
+    Counterexample:
+      type: object
+      description: A concrete, shrunken input that falsifies the property.
+      required:
+        [id, obligation_id, property, inputs, expected, actual, shrunk,
+         shrink_steps, replay, created_at]
+      properties:
+        id:
+          $ref: "#/components/schemas/CounterexampleId"
+        obligation_id:
+          $ref: "#/components/schemas/ObligationId"
+        property:
+          type: string
+          description: The property text that was violated.
+        inputs:
+          type: array
+          minItems: 1
+          items:
+            $ref: "#/components/schemas/CounterexampleInput"
+        expected:
+          type: string
+          description: What the property required, rendered for humans.
+        actual:
+          type: string
+          description: What the code actually did, rendered for humans.
+        shrunk:
+          type: boolean
+          description: True when the minimizer ran to a fixed point.
+        shrink_steps:
+          type: integer
+          minimum: 0
+        replay:
+          type: object
+          required: [seed, command]
+          properties:
+            seed:
+              type: string
+            command:
+              type: string
+              description: Copy-pasteable command that deterministically replays this failure.
+        created_at:
+          $ref: "#/components/schemas/Timestamp"
+    ObligationTarget:
+      type: object
+      required: [name, file, line]
+      properties:
+        name:
+          type: string
+          description: Function or method under obligation, `Class.method` for methods.
+        file:
+          type: string
+        line:
+          type: integer
+          minimum: 1
+    Obligation:
+      type: object
+      description: >
+        One (function, spec) pair a run must check. Verdict-dependent fields:
+        `verified` is non-null iff verdict is VERIFIED; `counterexample` is
+        non-null iff verdict is FALSIFIED; `unknown_reason` is non-null iff
+        verdict is UNKNOWN.
+      required:
+        [id, run_id, spec_id, target, source, verdict, verified,
+         counterexample, unknown_reason, duration_ms, created_at]
+      properties:
+        id:
+          $ref: "#/components/schemas/ObligationId"
+        run_id:
+          $ref: "#/components/schemas/RunId"
+        spec_id:
+          $ref: "#/components/schemas/SpecId"
+        target:
+          $ref: "#/components/schemas/ObligationTarget"
+        source:
+          type: string
+          enum: [changed, blast_radius]
+          description: Whether the target changed directly or inherited the obligation.
+        verdict:
+          $ref: "#/components/schemas/Verdict"
+        verified:
+          oneOf:
+            - $ref: "#/components/schemas/BoundedVerification"
+            - type: "null"
+        counterexample:
+          oneOf:
+            - $ref: "#/components/schemas/Counterexample"
+            - type: "null"
+        unknown_reason:
+          oneOf:
+            - $ref: "#/components/schemas/UnknownReason"
+            - type: "null"
+        duration_ms:
+          type: integer
+          minimum: 0
+        created_at:
+          $ref: "#/components/schemas/Timestamp"
+
+    # ---- specs --------------------------------------------------------------
+    SpecStatus:
+      type: string
+      enum: [candidate, accepted, rejected]
+    SpecProvenance:
+      type: string
+      enum: [mined, static, proposed]
+      description: >
+        Where the spec came from — mined from traces, derived statically, or
+        proposed by a human/agent. Optional in v1 (ADR-006).
+    Spec:
+      type: object
+      required: [id, repo_id, target, body, status, created_at]
+      properties:
+        id:
+          $ref: "#/components/schemas/SpecId"
+        repo_id:
+          $ref: "#/components/schemas/RepoId"
+        target:
+          type: object
+          required: [name, file]
+          properties:
+            name:
+              type: string
+            file:
+              type: string
+        body:
+          type: string
+          description: >
+            Spec source text. The spec DSL grammar is a G-DSL decision that has
+            not been made; v1 treats this as opaque text and fixture bodies are
+            non-normative placeholders.
+        status:
+          $ref: "#/components/schemas/SpecStatus"
+        provenance:
+          $ref: "#/components/schemas/SpecProvenance"
+        confidence:
+          type: number
+          minimum: 0
+          maximum: 1
+          description: Miner/ranker confidence. Optional in v1 (ADR-006).
+        created_at:
+          $ref: "#/components/schemas/Timestamp"

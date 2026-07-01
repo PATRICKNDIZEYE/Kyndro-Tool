@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://kyndro.app/contract/events/run.started.schema.json",
+  "title": "run.started",
+  "description": "Emitted once when a queued run begins executing. Envelope shape per ADR-005; event schemas are deliberately self-contained (no cross-file $ref).",
+  "type": "object",
+  "required": ["id", "type", "created_at", "data"],
+  "additionalProperties": false,
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Event id — evt_ + 26-char Crockford-base32 ULID (ADR-001). Consumers deduplicate on this.",
+      "pattern": "^evt_[0-9a-hjkmnp-tv-z]{26}$"
+    },
+    "type": { "const": "run.started" },
+    "created_at": { "type": "string", "format": "date-time" },
+    "data": {
+      "type": "object",
+      "required": ["run"],
+      "additionalProperties": false,
+      "properties": {
+        "run": { "$ref": "#/$defs/RunSnapshot" }
+      }
+    }
+  },
+  "$defs": {
+    "RunSnapshot": {
+      "type": "object",
+      "description": "Compact snapshot of the run at emission time. status is 'running' for this event.",
+      "required": ["id", "repo_id", "status", "head_sha", "base_sha", "pr_number", "verdict_counts", "created_at", "started_at", "completed_at"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^run_[0-9a-hjkmnp-tv-z]{26}$" },
+        "repo_id": { "type": "string", "pattern": "^repo_[0-9a-hjkmnp-tv-z]{26}$" },
+        "status": { "const": "running" },
+        "head_sha": { "type": "string", "pattern": "^[0-9a-f]{40}$" },
+        "base_sha": { "type": "string", "pattern": "^[0-9a-f]{40}$" },
+        "pr_number": { "type": ["integer", "null"], "minimum": 1 },
+        "verdict_counts": {
+          "type": "object",
+          "required": ["verified", "falsified", "unknown"],
+          "properties": {
+            "verified": { "type": "integer", "minimum": 0 },
+            "falsified": { "type": "integer", "minimum": 0 },
+            "unknown": { "type": "integer", "minimum": 0 }
+          }
+        },
+        "created_at": { "type": "string", "format": "date-time" },
+        "started_at": { "type": ["string", "null"], "format": "date-time" },
+        "completed_at": { "type": ["string", "null"], "format": "date-time" }
+      }
+    }
+  }
+}

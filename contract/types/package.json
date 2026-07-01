@@ -1,0 +1,11 @@
+{
+  "name": "@kyndro/types",
+  "version": "1.0.0",
+  "description": "TypeScript types generated from the Kyndro OpenAPI contract. Do not edit by hand — run contract/scripts/generate-types.sh.",
+  "types": "index.d.ts",
+  "files": [
+    "index.d.ts"
+  ],
+  "sideEffects": false,
+  "private": true
+}
