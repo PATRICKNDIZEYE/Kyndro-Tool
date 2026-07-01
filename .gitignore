@@ -1,0 +1,18 @@
+# dependencies / build
+node_modules/
+dist/
+build/
+.cache/
+
+# secrets — never committed (PLAN.md §6)
+.env
+.env.*
+*.pem
+
+# OS noise
+.DS_Store
+
+# superseded local originals of the plan docs — pending H-PO decision D4 (digest 2026-07-02)
+General.MD
+General.MDes
+Guide.MDes

@@ -1,0 +1,36 @@
+id: W1-SYS-2
+wave: W1
+agent: FE-SYS
+title: Marketing landing page + waitlist capture
+branch: w1/fe-sys-landing-waitlist
+depends_on: [W1-PLAT-1]
+context:
+  - "Blocked until W1-PLAT-1 passes G-CONTRACT (wave rule: contract freezes before
+     fan-out, PLAN.md §1 P4)."
+  - "Territory (PLAN.md §3): /site/ is owned by FE-SYS."
+  - "Scope, verbatim from kyndro-sprint-plan.md Sprint 1 frontend: 'Marketing landing
+     page skeleton on kyndro.app (waitlist capture live by end of sprint).'"
+  - "G-PUB is human-only (PLAN.md §2 FE-SYS charter + §6): build and preview everything
+     locally/in staging; a HUMAN presses the deploy/publish button. 'Live by end of
+     sprint' therefore means ready-to-publish + G-PUB filed, not self-deployed."
+  - "FE-SYS charter: never write copy that describes unshipped behavior as shipped.
+     The product has no live verdicts yet — the page sells the concept and captures
+     emails, nothing more."
+  - "Waitlist storage (table/service) is a new dependency or service: ADR + G-DEP
+     before implementation (PLAN.md §5). NEVER store secrets in code (PLAN.md §6);
+     any API key for the storage backend is a named repo secret (see HUMAN-SETUP.md)."
+deliverables:
+  - /site/** (landing page + waitlist form + storage wiring)
+  - /docs/adr/ADR-00X-waitlist-storage.md (PROPOSED)
+acceptance:
+  - "Lighthouse >= 90; form stores to table (PLAN.md §7 W1 table, verbatim)"
+  - "Lighthouse >= 90 on performance, accessibility, and best-practices categories,
+     measured against a production build (command documented in /site/README)"
+  - "Waitlist form: a submitted email is persisted to the storage table; an invalid
+     email is rejected with a visible error; success state is rendered after submit"
+  - "Page builds and renders locally with no Kyndro backend running"
+  - "No public deploy performed by any agent — a G-PUB request with preview URL/steps
+     is filed for the human instead"
+human_gate: G-PUB
+max_attempts: 2
+status: blocked

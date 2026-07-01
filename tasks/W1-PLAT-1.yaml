@@ -1,0 +1,53 @@
+id: W1-PLAT-1
+wave: W1
+agent: BE-PLAT
+title: Author contract v1 (OpenAPI + event schemas) and publish the golden fixture library
+branch: w1/be-plat-contract-v1
+depends_on: []
+context:
+  - "This is the SEQUENTIAL-FIRST packet (PLAN.md §1 P4): the shared contract is written
+     alone, by one agent, and frozen by a human gate BEFORE the team fans out. Every other
+     W1 packet is blocked on this one. Nobody builds against an unwritten interface."
+  - "Territory (PLAN.md §3): /contract/ is written by BE-PLAT only via contract-change
+     tasks and frozen by human gate G-CONTRACT. /fixtures/ is published by BE-PLAT,
+     versioned; everyone reads."
+  - "OpenAPI v1 surface, verbatim from kyndro-sprint-plan.md Sprint 1: auth, /repos,
+     /runs, /runs/:id, /runs/:id/obligations, /specs."
+  - "Webhook/event schemas, verbatim from kyndro-sprint-plan.md Sprint 1: run.started,
+     run.updated, run.completed."
+  - "Obligation verdict states are exactly three: VERIFIED (bounded) / FALSIFIED / UNKNOWN
+     (kyndro-sprint-plan.md Sprint 5). The contract must encode these as an enum."
+  - "A shared @kyndro/types package is generated from the OpenAPI spec so all codebases
+     import identical types (kyndro-sprint-plan.md §1 Rituals). Include the generation
+     script; publishing/wiring into apps happens in later packets."
+  - "Candidate specs will later carry provenance (mined | static | proposed) and a
+     confidence score (kyndro-sprint-plan.md Sprint 4). Design v1 fixture/spec shapes so
+     that is addable without a breaking change; do NOT implement the full Sprint 4 model."
+  - "No ADRs exist yet. Schema-shaping decisions (pagination style, error envelope,
+     ID format) must each be PROPOSED as an ADR in /docs/adr/ using ADR-000-template.md;
+     humans accept (PLAN.md §3). Tooling used for validation/generation is a new
+     dependency and needs an ADR + G-DEP (PLAN.md §5)."
+deliverables:
+  - /contract/openapi.yaml
+  - /contract/events/*.schema.json
+  - /contract/README.md (how to validate; how types are generated)
+  - /fixtures/** (versioned golden set)
+  - /docs/adr/ADR-00X-*.md (PROPOSED, one per schema-shaping decision)
+acceptance:
+  - "/contract/openapi.yaml validates with zero errors under an OpenAPI 3.x validator
+     (validation command documented in /contract/README.md and runnable in CI)"
+  - "Contract covers, verbatim from the Sprint 1 list: auth, /repos, /runs, /runs/:id,
+     /runs/:id/obligations, /specs, plus event schemas for run.started, run.updated,
+     run.completed"
+  - "Verdict enum in the contract is exactly: VERIFIED, FALSIFIED, UNKNOWN, with bounded
+     verification metadata representable for VERIFIED"
+  - "Golden fixture library published in /fixtures/, verbatim from the Sprint 1 list:
+     a sample analyzed PR, obligations in all 3 verdict states, one counterexample,
+     10 candidate specs"
+  - "Every fixture payload validates against the corresponding contract schema via a
+     script committed with the fixtures (CI-runnable, exits non-zero on mismatch)"
+  - "Type generation script produces @kyndro/types from openapi.yaml deterministically
+     (running it twice yields identical output)"
+human_gate: G-CONTRACT
+max_attempts: 2
+status: todo

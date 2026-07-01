@@ -1,0 +1,40 @@
+id: W1-CORE-1
+wave: W1
+agent: BE-CORE
+title: Architecture spike — tree-sitter → typed IR proof-of-concept (TypeScript)
+branch: w1/be-core-ir-spike
+depends_on: [W1-PLAT-1]
+context:
+  - "Blocked until W1-PLAT-1 passes G-CONTRACT: the fixture repo you parse comes from
+     the /fixtures/ golden set that packet publishes (PLAN.md §1 P4)."
+  - "Territory (PLAN.md §3): /engine/ and /engine/tests/ are owned by BE-CORE. Do not
+     touch /platform/, /app/, /site/."
+  - "Scope, verbatim from kyndro-sprint-plan.md Sprint 1 backend: 'Architecture spike:
+     tree-sitter → typed IR proof-of-concept on TypeScript (parse, walk, print function
+     inventory).'"
+  - "This spike seeds the W3 semantic-diff work (AST diff, call graph, blast radius).
+     PLAN.md §4.1's worked example fixes function-level granularity for blast radius —
+     design the IR so function-level analysis is the natural unit."
+  - "tree-sitter (and its TypeScript grammar) is a new dependency: file an ADR and get
+     G-DEP approval BEFORE adding it (PLAN.md §5, §6 ALWAYS-ASK list)."
+  - "BE-CORE quality bar (charter, PLAN.md §2): every module ships with golden tests;
+     every parser ships with error-message tests — bad input must produce a helpful
+     message, that is product surface."
+deliverables:
+  - /engine/parser/** (tree-sitter frontend)
+  - /engine/ir/** (typed IR + walker + function-inventory printer)
+  - /engine/tests/** (golden + error-message tests)
+  - /docs/adr/ADR-00X-tree-sitter.md (PROPOSED)
+acceptance:
+  - "parses fixture repo; prints function inventory; 20 golden tests (PLAN.md §7 W1
+     table, verbatim)"
+  - "Function inventory lists every named function, class method, and exported arrow
+     function in the /fixtures/ sample repo, each with file path and source span"
+  - "The 20 golden tests cover at minimum: plain functions, class methods, arrow
+     functions, async functions, generics, and default-exported functions"
+  - "At least 3 error-message tests: syntactically broken input produces a helpful,
+     human-readable message naming the location of the problem (BE-CORE charter)"
+  - "pnpm test engine (or the monorepo equivalent) passes clean in CI"
+human_gate: none
+max_attempts: 2
+status: blocked

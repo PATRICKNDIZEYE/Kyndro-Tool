@@ -1,0 +1,47 @@
+id: W1-APP-1
+wave: W1
+agent: FE-APP
+title: Mock server from contract + MSW handlers + minimal dashboard rendering fixtures
+branch: w1/fe-app-mock-server
+depends_on: [W1-PLAT-1]
+context:
+  - "Blocked until W1-PLAT-1 passes G-CONTRACT: you build FROM the frozen contract and
+     fixtures, never ahead of them (PLAN.md §1 P4)."
+  - "Territory (PLAN.md §3): /app/ except /app/design-system/ is owned by FE-APP."
+  - "Scope, verbatim from kyndro-sprint-plan.md Sprint 1 frontend: 'Stand up Prism mock
+     server from OpenAPI v1 + MSW handlers seeded with fixtures.' Prism and MSW are new
+     dependencies: ADR + G-DEP before install (PLAN.md §5)."
+  - "FE-APP charter (PLAN.md §2): build against the mock server generated from
+     /contract/openapi.yaml, seeded with /fixtures/. NEVER invent an API shape not in
+     the contract. NEVER hardcode fixture data inside components. Every screen ships
+     behind a feature flag defaulting to mock; flipping mock→live is a config change,
+     never a rewrite."
+  - "The W1 exit gate (PLAN.md §7) is 'mock dashboard renders fixtures with zero
+     backend' — so this packet includes a minimal dashboard shell (run list + run
+     detail) that renders the fixture data through the mock layer. Full run
+     history/detail UX comes in W3; keep this minimal."
+  - "Sprint 1 definition of done, verbatim (kyndro-sprint-plan.md): 'npm run dev on FE
+     shows a fake-but-realistic dashboard with zero backend running.'"
+  - "Every screen must ship loading, empty, and error states or QA-CRITIC will reject
+     it (FE-APP charter)."
+  - "Use design-system components from /app/design-system/ (W1-SYS-1) where available;
+     do not restyle or fork them."
+deliverables:
+  - /app/mock/** (Prism config + MSW handlers seeded from /fixtures/)
+  - /app/flags/** (mock/live feature-flag plumbing)
+  - /app/screens/** (minimal dashboard: run list + run detail rendering fixtures)
+  - /app/tests/contract/** (frontend-side contract tests)
+  - /docs/adr/ADR-00X-mock-tooling.md (PROPOSED)
+acceptance:
+  - "all fixture endpoints served; contract tests pass (PLAN.md §7 W1 table, verbatim)"
+  - "Every path in /contract/openapi.yaml is served by the mock layer with data drawn
+     from /fixtures/ (no inline fixture data in components)"
+  - "Frontend-side contract tests fail the build if a handler or consumer drifts from
+     the schema (kyndro-sprint-plan.md §1 Rule 4)"
+  - "npm run dev shows a fake-but-realistic dashboard with zero backend running
+     (Sprint 1 definition of done, verbatim)"
+  - "Run list and run detail screens each render loading, empty, and error states
+     (demonstrable by toggling the mock layer)"
+human_gate: none
+max_attempts: 2
+status: blocked

@@ -1,0 +1,48 @@
+id: W1-PLAT-2
+wave: W1
+agent: BE-PLAT
+title: CI/CD, environments, telemetry, and deterministic hook config
+branch: w1/be-plat-ci-envs
+depends_on: [W1-PLAT-1]
+context:
+  - "Blocked until W1-PLAT-1 passes G-CONTRACT (PLAN.md §1 P4: contract freezes before
+     fan-out). ORCH flips this packet to todo when the contract is frozen."
+  - "Territory (PLAN.md §3): /platform/ and /infra/ are owned by BE-PLAT."
+  - "Scope, verbatim from kyndro-sprint-plan.md Sprint 1 backend: 'Monorepo, CI/CD,
+     dev/staging environments, error tracking + tracing from day one.'"
+  - "Deterministic hooks required by PLAN.md §4.3: PreToolUse on Bash blocks
+     git push --force, rm -rf, network calls from sandbox test runs; PostToolUse on
+     Edit/Write runs linter + secret scanner on touched files. A starter
+     .claude/settings.json block exists in HUMAN-SETUP.md — harden and extend it."
+  - "CI required checks, verbatim from PLAN.md §4.3: contract tests (both directions),
+     full test suite, PR-size check (>400 lines fails with 'split this packet'),
+     territory check (diff paths ⊆ owner's territory per PLAN.md §3 table)."
+  - "This packet is G-SEC gated. Per the BE-PLAT charter, the PR description must
+     include a threat-model paragraph."
+  - "Every new dependency or paid service chosen here (CI provider, error tracker)
+     requires an ADR + G-DEP approval (PLAN.md §5). Batch them into ADRs before
+     implementation."
+  - "NEVER store a secret in code or fixtures (BE-PLAT charter). Secret NAMES are listed
+     in HUMAN-SETUP.md; a human sets the values in the repo settings."
+deliverables:
+  - /infra/ci/** (pipeline definitions for all required checks)
+  - /infra/envs/** (dev and staging environment configs)
+  - /infra/hooks/** (hook scripts referenced by .claude/settings.json)
+  - /platform/telemetry/** (error tracking + tracing bootstrap)
+  - /docs/adr/ADR-00X-*.md (PROPOSED, one per tool/service choice)
+acceptance:
+  - "pipeline green on empty app; hooks fire on a seeded violation (PLAN.md §7 W1 table,
+     verbatim)"
+  - "All four §4.3 required checks exist as named CI checks: contract tests (both
+     directions), full test suite, PR-size check failing >400 changed lines with the
+     message 'split this packet', territory check (diff paths ⊆ owner's territory)"
+  - "Seeded-violation proof committed as CI tests: a fixture diff containing a fake
+     secret is blocked by the secret scanner; a fixture diff of >400 lines is failed
+     by the size check; a fixture diff crossing territory boundaries is failed by the
+     territory check"
+  - "Error tracking + tracing wired for dev and staging: a thrown test error is visible
+     end-to-end in the tracker for each environment"
+  - "PR description contains a threat-model paragraph (G-SEC entry requirement)"
+human_gate: G-SEC
+max_attempts: 2
+status: blocked

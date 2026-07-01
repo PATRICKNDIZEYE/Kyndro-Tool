@@ -1,0 +1,37 @@
+id: W1-SYS-1
+wave: W1
+agent: FE-SYS
+title: Design tokens + component library seed
+branch: w1/fe-sys-tokens-components
+depends_on: [W1-PLAT-1]
+context:
+  - "Blocked until W1-PLAT-1 passes G-CONTRACT: verdict chip states must match the
+     frozen contract's verdict enum exactly (PLAN.md §1 P4)."
+  - "Territory (PLAN.md §3): /app/design-system/ is owned by FE-SYS. Do not touch the
+     rest of /app/ (FE-APP territory)."
+  - "Scope, verbatim from kyndro-sprint-plan.md Sprint 1 frontend: 'Design tokens +
+     component library seed: typography, colors, buttons, tables, status chips
+     (VERIFIED / FALSIFIED / UNKNOWN), monospace code block, diff viewer shell.'"
+  - "The three verdict chips (VERIFIED / FALSIFIED / UNKNOWN) are the product's core
+     visual vocabulary. VERIFIED is bounded verification — the design should leave room
+     for a bounds disclosure later (kyndro-sprint-plan.md Sprint 11: honesty is brand)."
+  - "FE-SYS charter (PLAN.md §2): NEVER introduce a second styling approach. The
+     approach you pick here is binding for every later wave — record it in an ADR."
+  - "Component workbench (e.g., Storybook) and styling tooling are new dependencies:
+     ADR + G-DEP approval before install (PLAN.md §5)."
+deliverables:
+  - /app/design-system/tokens/** (typography, color, spacing tokens)
+  - /app/design-system/components/** (buttons, tables, status chips, code block, diff shell)
+  - /app/design-system/stories/** (workbench stories per component)
+  - /docs/adr/ADR-00X-styling-approach.md (PROPOSED)
+acceptance:
+  - "Storybook builds; a11y lint clean (PLAN.md §7 W1 table, verbatim)"
+  - "All seed components exist, verbatim from the Sprint 1 list: typography, colors,
+     buttons, tables, status chips (VERIFIED / FALSIFIED / UNKNOWN), monospace code
+     block, diff viewer shell"
+  - "Each component has at least one story showing its default state and one edge state
+     (long text, empty content, or overflow)"
+  - "Verdict chip labels/states exactly match the verdict enum in /contract/openapi.yaml"
+human_gate: G-UX
+max_attempts: 2
+status: blocked
