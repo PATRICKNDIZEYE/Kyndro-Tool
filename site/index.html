@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Kyndro — know if your code actually does what it says</title>
+    <meta
+      name="description"
+      content="Kyndro checks your code against its own spec and gives you an honest verdict: VERIFIED, FALSIFIED, or UNKNOWN. Join the waitlist for early access."
+    />
+    <link rel="stylesheet" href="/src/style.css" />
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+
+    <main id="main">
+      <section class="hero">
+        <h1>Know if your code actually does what it says.</h1>
+        <p>
+          Kyndro checks the functions your pull request touches against a spec —
+          mined from your code, or written by hand — and gives you one of three
+          honest verdicts. No guessing, no green checkmark theater.
+        </p>
+        <div class="verdicts" role="list" aria-label="Possible verdicts">
+          <span class="verdict-pill verified" role="listitem">VERIFIED</span>
+          <span class="verdict-pill falsified" role="listitem">FALSIFIED</span>
+          <span class="verdict-pill unknown" role="listitem">UNKNOWN</span>
+        </div>
+      </section>
+
+      <section class="waitlist" aria-labelledby="waitlist-heading">
+        <h2 id="waitlist-heading">Get early access</h2>
+        <form id="waitlist-form" class="waitlist-form" novalidate>
+          <label for="email" class="visually-hidden">Email address</label>
+          <input
+            id="email"
+            name="email"
+            type="email"
+            placeholder="you@company.com"
+            autocomplete="email"
+            required
+          />
+          <button type="submit" id="waitlist-submit">Join waitlist</button>
+        </form>
+        <p id="waitlist-status" class="waitlist-status" role="status" aria-live="polite"></p>
+      </section>
+
+      <p class="disclaimer">
+        Kyndro is in private development — there is no live product yet.
+        Joining the waitlist reserves your spot for early access; it does not
+        grant access to any running verification service today.
+      </p>
+    </main>
+
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

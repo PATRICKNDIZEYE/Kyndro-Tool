@@ -9,6 +9,10 @@ build/
 .env.*
 *.pem
 
+# local-only captured data — never committed
+site/data/waitlist.json
+site/lighthouse-report.json
+
 # OS noise
 .DS_Store
 

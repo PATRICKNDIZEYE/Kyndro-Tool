@@ -1,0 +1,195 @@
+/*
+ * Local copy of the brand-relevant subset of Kyndro's design tokens
+ * (see docs/adr/ADR-008-styling-approach.md on w1/fe-sys-tokens-components,
+ * unmerged as of this packet). Duplicated intentionally rather than taking a
+ * workspace dependency on an unmerged sibling branch's package — once both
+ * branches land, this block should be deleted in favor of importing
+ * @kyndro/design-system's tokens.css directly.
+ */
+:root {
+  --kyndro-color-bg: #ffffff;
+  --kyndro-color-bg-subtle: #f6f7f9;
+  --kyndro-color-border: #e2e5ea;
+  --kyndro-color-text: #14161a;
+  --kyndro-color-text-muted: #5b6270;
+  --kyndro-color-brand: #4f46e5;
+  --kyndro-color-brand-hover: #4338ca;
+  --kyndro-color-brand-contrast: #ffffff;
+  --kyndro-color-verified-bg: #e8f7ee;
+  --kyndro-color-verified-fg: #146c34;
+  --kyndro-color-falsified-bg: #fdeaea;
+  --kyndro-color-falsified-fg: #9c1c1c;
+  --kyndro-color-unknown-bg: #f1f2f4;
+  --kyndro-color-unknown-fg: #4b5160;
+  --kyndro-color-danger: #b3261e;
+  --kyndro-color-danger-bg: #fdeaea;
+  --kyndro-font-sans: -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;
+  --kyndro-font-size-sm: 0.875rem;
+  --kyndro-font-size-md: 1rem;
+  --kyndro-font-size-lg: 1.25rem;
+  --kyndro-font-size-xl: 2rem;
+  --kyndro-font-size-2xl: 2.75rem;
+  --kyndro-space-2: 0.5rem;
+  --kyndro-space-3: 0.75rem;
+  --kyndro-space-4: 1rem;
+  --kyndro-space-6: 1.5rem;
+  --kyndro-space-8: 2rem;
+  --kyndro-space-12: 3rem;
+  --kyndro-radius-sm: 4px;
+  --kyndro-radius-md: 8px;
+  --kyndro-focus-ring: 0 0 0 2px var(--kyndro-color-bg), 0 0 0 4px var(--kyndro-color-brand);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: var(--kyndro-font-sans);
+  color: var(--kyndro-color-text);
+  background: var(--kyndro-color-bg);
+  line-height: 1.5;
+}
+
+a {
+  color: var(--kyndro-color-brand);
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  background: var(--kyndro-color-brand);
+  color: var(--kyndro-color-brand-contrast);
+  padding: var(--kyndro-space-2) var(--kyndro-space-4);
+  z-index: 10;
+}
+.skip-link:focus {
+  left: var(--kyndro-space-4);
+  top: var(--kyndro-space-4);
+}
+
+.hero {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: var(--kyndro-space-12) var(--kyndro-space-4) var(--kyndro-space-8);
+  text-align: center;
+}
+
+.hero h1 {
+  font-size: var(--kyndro-font-size-2xl);
+  margin: 0 0 var(--kyndro-space-4);
+}
+
+.hero p {
+  font-size: var(--kyndro-font-size-lg);
+  color: var(--kyndro-color-text-muted);
+  margin: 0 0 var(--kyndro-space-8);
+}
+
+.verdicts {
+  display: flex;
+  gap: var(--kyndro-space-3);
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-bottom: var(--kyndro-space-8);
+}
+
+.verdict-pill {
+  padding: var(--kyndro-space-2) var(--kyndro-space-4);
+  border-radius: 999px;
+  font-size: var(--kyndro-font-size-sm);
+  font-weight: 600;
+}
+.verdict-pill.verified {
+  background: var(--kyndro-color-verified-bg);
+  color: var(--kyndro-color-verified-fg);
+}
+.verdict-pill.falsified {
+  background: var(--kyndro-color-falsified-bg);
+  color: var(--kyndro-color-falsified-fg);
+}
+.verdict-pill.unknown {
+  background: var(--kyndro-color-unknown-bg);
+  color: var(--kyndro-color-unknown-fg);
+}
+
+.waitlist {
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 0 var(--kyndro-space-4) var(--kyndro-space-12);
+}
+
+.waitlist-form {
+  display: flex;
+  gap: var(--kyndro-space-2);
+  flex-wrap: wrap;
+}
+
+.waitlist-form input[type="email"] {
+  flex: 1 1 240px;
+  padding: var(--kyndro-space-3);
+  border: 1px solid var(--kyndro-color-border);
+  border-radius: var(--kyndro-radius-sm);
+  font-size: var(--kyndro-font-size-md);
+}
+.waitlist-form input[type="email"]:focus-visible {
+  outline: none;
+  box-shadow: var(--kyndro-focus-ring);
+}
+
+.waitlist-form button {
+  padding: var(--kyndro-space-3) var(--kyndro-space-6);
+  border: none;
+  border-radius: var(--kyndro-radius-sm);
+  background: var(--kyndro-color-brand);
+  color: var(--kyndro-color-brand-contrast);
+  font-size: var(--kyndro-font-size-md);
+  font-weight: 600;
+  cursor: pointer;
+}
+.waitlist-form button:hover {
+  background: var(--kyndro-color-brand-hover);
+}
+.waitlist-form button:focus-visible {
+  outline: none;
+  box-shadow: var(--kyndro-focus-ring);
+}
+.waitlist-form button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.waitlist-status {
+  margin-top: var(--kyndro-space-3);
+  font-size: var(--kyndro-font-size-sm);
+  min-height: 1.5em;
+}
+.waitlist-status[data-state="error"] {
+  color: var(--kyndro-color-danger);
+}
+.waitlist-status[data-state="success"] {
+  color: var(--kyndro-color-verified-fg);
+}
+
+.disclaimer {
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 0 var(--kyndro-space-4) var(--kyndro-space-8);
+  color: var(--kyndro-color-text-muted);
+  font-size: var(--kyndro-font-size-sm);
+  text-align: center;
+}

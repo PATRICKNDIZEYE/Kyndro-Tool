@@ -33,4 +33,63 @@ acceptance:
      is filed for the human instead"
 human_gate: G-PUB
 max_attempts: 2
-status: todo
+status: human_gate
+notes: |
+  Shipped by an unattended agent session (no human present; ADR-and-proceed
+  rule in effect). Branch: w1/fe-sys-landing-waitlist, pushed to origin, no PR
+  opened per this session's push-only rule. Status set to human_gate because
+  this packet's gate (G-PUB) is real and unresolved — nothing was deployed.
+
+  What shipped:
+  - docs/adr/ADR-010-waitlist-storage.md (PROPOSED): a local JSON-file-backed
+    "table" (site/server/waitlistStore.ts) as the v1 waitlist storage, since
+    no human was present to provision a real hosted service/secret. Two-function
+    interface (appendEntry/readAll) so swapping in a real service later is a
+    small change, not a rewrite.
+  - site/vite.config.ts: dev-only middleware serving POST /api/waitlist
+    against that store (not present in the production build — no deploy
+    target exists yet).
+  - site/index.html + src/{main.ts,validateEmail.ts,style.css}: a small
+    vanilla-TS (no framework) landing page — hero copy that explicitly says
+    "no live product yet" (FE-SYS charter: never describe unshipped behavior
+    as shipped), a waitlist form with idle/error/success states, and an
+    explicit disclaimer paragraph.
+  - Brand colors/type scale/spacing are a hand-copied subset of the tokens
+    from the unmerged w1/fe-sys-tokens-components branch (same values, e.g.
+    --kyndro-color-brand: #4f46e5), not imported as a package dependency —
+    this branch also forked from main pre-merge, so /app/design-system does
+    not exist here. Flagged as follow-up: once both FE-SYS branches merge,
+    delete the local copy in site/src/style.css and import
+    @kyndro/design-system's tokens.css instead.
+  - Tests: site/tests/validateEmail.test.ts (9 cases) and
+    site/tests/waitlistStore.test.ts (4 cases, temp-file backed) — 13/13
+    passing. Manually smoke-tested the real dev server end-to-end: POSTed a
+    valid email, confirmed it landed in site/data/waitlist.json with a
+    timestamp; POSTed an invalid one, confirmed a 400 + visible error path.
+
+  Verification run (all green): `tsc --noEmit`, `vitest run` (13/13),
+  `vite build` (clean; total JS payload 1.7 kB gzipped 0.91 kB — should clear
+  a performance-category Lighthouse score comfortably given how little ships).
+
+  NOT done — needs a human:
+  - Lighthouse itself was not run: no headless Chrome/Chromium available in
+    this sandbox. Exact commands are documented in site/README.md
+    ("Measuring Lighthouse") for the human to run against the production
+    build. Given the ~2KB total payload, semantic HTML, and no render-blocking
+    resources, I'd expect >=90 across all three categories, but this is an
+    expectation, not a verified result — do not treat it as VERIFIED.
+  - G-PUB: no deploy was attempted (correctly, per PLAN.md — this gate is
+    human-only). Filing the request here: preview by running
+    `pnpm --filter @kyndro/site build && pnpm --filter @kyndro/site preview`
+    and visiting the printed localhost URL. Once a human is ready to publish
+    kyndro.app, they'll also need to decide on and provision a real waitlist
+    storage service (see ADR-010's "Consequences") before this goes fully live
+    — the local JSON file is not durable/production storage.
+  - ADR numbering: ADR-010 was chosen to avoid colliding with ADR-008
+    (w1/fe-sys-tokens-components) and ADR-009 (w1/fe-app-mock-server), both
+    still unmerged and both also using numbers claimed fresh off `main`.
+    Needs human/ORCH renumbering once merge order is decided.
+  - Root pnpm-workspace.yaml / package.json were (again) independently
+    recreated on this third unmerged branch — expect a three-way merge
+    conflict across all W1 branches touching these two files; trivial to
+    reconcile (they should end up identical modulo the packages: list).
