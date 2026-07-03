@@ -44,4 +44,62 @@ acceptance:
      (demonstrable by toggling the mock layer)"
 human_gate: none
 max_attempts: 2
-status: todo
+status: in_review
+notes: |
+  Shipped by an unattended agent session (no human present; ADR-and-proceed rule
+  in effect — see below). Branch: w1/fe-app-mock-server, pushed to origin, no PR
+  opened per this session's push-only rule.
+
+  What shipped:
+  - docs/adr/ADR-009-mock-tooling.md (PROPOSED): MSW (browser+node) for the
+    in-app mock layer; Prism via `pnpm dlx @stoplight/prism-cli` (not installed
+    as a dependency) for a standalone contract-only mock server; Vitest +
+    Testing Library + jsdom + ajv + @apidevtools/swagger-parser for tests.
+  - app/mock/{fixtures,handlers,browser,node}.ts: all 8 contract operations
+    served, seeded from /fixtures/ golden files. /auth/github and /auth/me have
+    no golden fixtures (none exist in /fixtures/), so their payloads are
+    synthesized locally in app/mock/fixtures.ts and clearly commented as such.
+  - Types come from the generated @kyndro/types package (contract/types),
+    not hand-rolled interfaces — added as a workspace dependency.
+  - app/flags/index.ts: mock/live flag, defaults to mock (VITE_API_MODE=live
+    is the escape hatch; no live implementation exists yet, by design).
+  - app/screens/RunList + RunDetail: minimal dashboard using @kyndro/design-system
+    (Table, StatusChip, Button, CodeBlock). Each screen has explicit loading,
+    empty, and error states, verified in app/tests/ui/*.test.tsx via MSW
+    server.use() overrides and the ?scenario= query param convention.
+  - DiffViewerShell (design-system) is deliberately NOT used yet: the contract
+    gives us a Counterexample (property/expected/actual/replay), not diff
+    lines, and fabricating fake diff content felt dishonest for a tool whose
+    whole premise is honest verdicts. Counterexamples render as text via
+    CodeBlock instead. Flagging this as a judgment call for human review.
+  - app/tests/contract/mock-responses.test.ts: dereferences
+    contract/openapi.yaml with swagger-parser and validates every mocked
+    response against its schema with ajv, for all 8 operations.
+
+  Verification run (all green): `tsc --noEmit`, `vitest run` (14/14 passed:
+  8 contract + 6 UI), `vite build` (clean prod build), manual `vite` dev-server
+  smoke check (index.html, main.tsx, mock/browser.ts, mockServiceWorker.js all
+  serve/transform correctly).
+
+  Flagged for human review:
+  - ADR numbering collision: this branch forked before w1/fe-sys-tokens-components
+    merged, so both branches independently used ADR-008 vs this branch's
+    ADR-009. Needs renumbering/reconciliation at merge time.
+  - Root pnpm-workspace.yaml / package.json were independently (re)created on
+    both unmerged W1 branches — expect a trivial merge conflict, reconcile to
+    one copy.
+  - This branch pulled app/design-system from w1/fe-sys-tokens-components into
+    its working tree temporarily (read-only, for local typecheck/build) and
+    removed it again before this commit — it is NOT part of this commit or
+    branch. Until both branches merge, this branch cannot stand alone (its
+    @kyndro/design-system workspace dependency won't resolve on a fresh
+    checkout) — this is expected for two territory-scoped branches that both
+    touch the same monorepo pre-merge, not a bug in either packet.
+  - Diff is ~1314 lines (excluding pnpm-lock.yaml), over the PLAN.md §4.3
+    400-line PR cap — same situation as W1-SYS-1: this is a from-scratch
+    package scaffold (app/package.json, tsconfig, vite/vitest config, mock
+    layer, screens, tests all created together for the first time), not an
+    incremental change. No automated territory/size CI check exists yet
+    (that's W1-PLAT-2, still queued in this same session). Flagging for human
+    judgment rather than artificially splitting a packet whose deliverables
+    are inherently one cohesive unit.
