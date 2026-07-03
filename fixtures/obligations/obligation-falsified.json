@@ -1,0 +1,43 @@
+{
+  "id": "obl_01j9zx3fam5q8w2ke7ryn4vha2",
+  "run_id": "run_01j9zx3fam5q8w2ke7ryn4vht1",
+  "spec_id": "spec_01j9zx3fam5q8w2ke7ryn4vhs1",
+  "target": {
+    "name": "applyDiscount",
+    "file": "src/discount.ts",
+    "line": 10
+  },
+  "source": "changed",
+  "verdict": "FALSIFIED",
+  "verified": null,
+  "counterexample": {
+    "id": "cex_01j9zx3fam5q8w2ke7ryn4vhc1",
+    "obligation_id": "obl_01j9zx3fam5q8w2ke7ryn4vha2",
+    "property": "applyDiscount(subtotalCents, discounts) >= 0",
+    "inputs": [
+      {
+        "name": "subtotalCents",
+        "value": 100
+      },
+      {
+        "name": "discounts",
+        "value": [
+          { "kind": "percentage", "code": "SAVE60", "percent": 60 },
+          { "kind": "percentage", "code": "VIP60", "percent": 60 }
+        ]
+      }
+    ],
+    "expected": "a non-negative total (result >= 0)",
+    "actual": "-20",
+    "shrunk": true,
+    "shrink_steps": 17,
+    "replay": {
+      "seed": "0x2f9c4d1e",
+      "command": "kyndro replay obl_01j9zx3fam5q8w2ke7ryn4vha2 --seed 0x2f9c4d1e"
+    },
+    "created_at": "2026-07-01T09:15:09Z"
+  },
+  "unknown_reason": null,
+  "duration_ms": 1866,
+  "created_at": "2026-07-01T09:14:31Z"
+}

@@ -1,0 +1,20 @@
+{
+  "id": "obl_01j9zx3fam5q8w2ke7ryn4vha3",
+  "run_id": "run_01j9zx3fam5q8w2ke7ryn4vht1",
+  "spec_id": "spec_01j9zx3fam5q8w2ke7ryn4vhs6",
+  "target": {
+    "name": "checkout",
+    "file": "src/checkout.ts",
+    "line": 16
+  },
+  "source": "blast_radius",
+  "verdict": "UNKNOWN",
+  "verified": null,
+  "counterexample": null,
+  "unknown_reason": {
+    "code": "external_effects",
+    "message": "checkout awaits reserveStock(), which performs inventory I/O; the v1 harness cannot generate inputs across an external-effect boundary"
+  },
+  "duration_ms": 312,
+  "created_at": "2026-07-01T09:14:31Z"
+}

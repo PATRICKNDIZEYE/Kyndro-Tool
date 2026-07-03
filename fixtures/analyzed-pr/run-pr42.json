@@ -1,0 +1,40 @@
+{
+  "id": "run_01j9zx3fam5q8w2ke7ryn4vht1",
+  "repo_id": "repo_01j9zx3fam5q8w2ke7ryn4vht0",
+  "status": "completed",
+  "trigger": "pull_request",
+  "pr": {
+    "number": 42,
+    "title": "discounts: allow stacking multiple promotions",
+    "author_login": "mkaneza",
+    "url": "https://github.com/acme/sample-shop/pull/42"
+  },
+  "head_sha": "9f3c2a71b4de806f5a1c9e2d3b47a0c8e6f1d2a3",
+  "base_sha": "4d8e1f2a9c3b7605e4a2d1c8f9b3a7e60d5c4b1a",
+  "obligation_count": 3,
+  "verdict_counts": {
+    "verified": 1,
+    "falsified": 1,
+    "unknown": 1
+  },
+  "created_at": "2026-07-01T09:14:02Z",
+  "started_at": "2026-07-01T09:14:11Z",
+  "completed_at": "2026-07-01T09:16:47Z",
+  "analysis": {
+    "files_changed": 2,
+    "functions_changed": [
+      {
+        "name": "applyDiscount",
+        "file": "src/discount.ts",
+        "change_kind": "modified"
+      }
+    ],
+    "blast_radius": [
+      {
+        "name": "checkout",
+        "file": "src/checkout.ts",
+        "reason": "calls applyDiscount"
+      }
+    ]
+  }
+}

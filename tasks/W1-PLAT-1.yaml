@@ -50,4 +50,4 @@ acceptance:
      (running it twice yields identical output)"
 human_gate: G-CONTRACT
 max_attempts: 2
-status: todo
+status: in_review
