@@ -37,4 +37,86 @@ acceptance:
   - "pnpm test engine (or the monorepo equivalent) passes clean in CI"
 human_gate: none
 max_attempts: 2
-status: todo
+status: in_review
+notes: |
+  SHIPPED (branch w1/be-core-ir-spike, pushed, no PR opened — this session's
+  binding rule is push-only, no PRs).
+
+  ADR: docs/adr/ADR-014-tree-sitter-typescript-frontend.md (PROPOSED, needs
+  human ACCEPT) — chose web-tree-sitter (WASM) + tree-sitter-typescript's
+  prebuilt .wasm grammar over native tree-sitter bindings, specifically to
+  avoid any native-compile (node-gyp) step in the install path across
+  sandboxes/CI/contributor machines. Continues ADR numbering from 014 (011-
+  013 already used by W1-PLAT-2 on its own unmerged branch; 008-010 by three
+  other unmerged branches before that).
+
+  Deliverables:
+    - engine/parser/index.ts: parseTypeScript(source) -> {tree, source}.
+    - engine/parser/errors.ts: describeParseErrors/formatParseError — walks
+      ERROR/missing nodes into "file:line:col: reason" messages.
+    - engine/ir/types.ts, walker.ts, print.ts, index.ts: FunctionInfo IR,
+      buildFunctionInventory(tree, filePath), formatFunctionInventory().
+      Function-level granularity by design (PLAN.md §4.1's blast-radius
+      worked example is function-level) — this is meant to seed W3's
+      semantic-diff/call-graph/blast-radius work, which is explicitly NOT
+      implemented here (out of scope for this spike).
+    - engine/tests/: 39 tests total, all passing.
+        - walker.golden.test.ts: 26 golden tests covering plain functions,
+          exported/default-exported functions (named + anonymous), nested
+          non-exported functions, async/generator/async-generator
+          functions, arrow functions (const-assigned, exported, default-
+          exported anonymous, async, fully-anonymous-unassigned), class
+          methods (plain/static/async/generator/getter/setter, and
+          confirms a class's own methods are NOT marked exported just
+          because the class is), generics (single param, multiple
+          constrained params, generic arrow function), parameter shapes
+          (required/optional/defaulted/rest in one signature), and
+          whole-file source-order inventory listing.
+        - fixture-repo-inventory.test.ts: 7 tests parsing every file in the
+          real /fixtures/sample-repo/src (shop domain: cart, checkout,
+          discount, inventory, money, tax, types, index — 8 files), zero
+          parse errors, >10 functions found across 7 of 8 files (index.ts
+          is barrel re-exports only, correctly contributes zero), spot
+          checks (Cart's 5 methods qualified by class name, checkout's
+          async+exported flags, ok/err's generics, seedStock/reserveStock
+          as exported arrow functions), and a print-stability check.
+        - error-messages.test.ts: 5 tests (packet requires >=3) — unclosed
+          brace, stray token, mismatched parenthesis, single-error
+          formatting, and a true-negative (valid input produces zero
+          errors) — each asserting the message names the file:line:col.
+
+  Verification run this session:
+    - pnpm install (root workspace: engine package only) — clean; the
+      tree-sitter-typescript prebuild step ran (prebuilt binary, not a
+      from-source native compile) but is irrelevant to what we actually
+      import at runtime (web-tree-sitter's WASM path, per ADR-014).
+    - pnpm --filter @kyndro/engine test — 4 files, 39/39 passing.
+    - pnpm --filter @kyndro/engine build (tsc --noEmit) — clean.
+    - Manually ran formatFunctionInventory() against the full fixture repo
+      via a throwaway vitest test (deleted before commit) and eyeballed the
+      16-line output for correctness before finalizing the walker logic.
+
+  Flagged for human review:
+    - status is in_review, not done: human_gate is "none" per the packet,
+      so this is otherwise complete, but ADR-014 still needs a human ACCEPT
+      per PLAN.md §3 (any agent may PROPOSE, only humans ACCEPT).
+    - Root pnpm-workspace.yaml/package.json recreated independently on this
+      branch (5th unmerged branch to do so) — same expected collision
+      flagged on every prior packet this session.
+    - Known gaps documented in engine/README.md: TSX/JSX not wired in
+      (plain .ts only, per scope); no incremental re-parsing (W3's job);
+      no call graph / AST diff / blast radius (W3's job, this only seeds
+      it); anonymous class expressions assigned to a const do not pick up
+      the variable's name as className (not exercised by the fixture repo,
+      not covered by a golden test — flagged rather than silently wrong);
+      export detection is structural (inline export/export default only),
+      not semantic (no `export { foo }` list re-exports or CommonJS
+      `module.exports` support) — matches how the fixture repo and rest of
+      the codebase actually write exports.
+    - This diff is ~970 changed lines (excl. lockfile), exceeding the
+      400-line PR cap (PLAN.md §6) — same as every prior packet this
+      session: a from-scratch package scaffold (parser + IR + 39 tests +
+      ADR + engine/README.md) rather than an incremental change. No PR is
+      being opened this session regardless (push-only), so this is flagged
+      here for the human merge/split decision rather than enforced by CI
+      on a PR that doesn't exist yet.
