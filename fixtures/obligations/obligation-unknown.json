@@ -5,7 +5,7 @@
   "target": {
     "name": "checkout",
     "file": "src/checkout.ts",
-    "line": 17
+    "line": 16
   },
   "source": "blast_radius",
   "verdict": "UNKNOWN",

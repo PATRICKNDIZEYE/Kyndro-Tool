@@ -18,7 +18,10 @@ and keep each event's JSON Schema file fully self-contained (RunSnapshot defined
 local `$defs`, no cross-file `$ref`), so any consumer can validate a payload with one
 file and no resolver. `id` is the deduplication key; ULID ordering (ADR-001) gives
 per-run event ordering. `run.updated` additionally carries `changed_obligations`
-(id + verdict deltas).
+(id + verdict deltas). `RunSnapshot.pr` carries the same `PullRequestRef` shape as
+the REST `Run.pr` (changed at the G-CONTRACT gate from a bare `pr_number` integer,
+so consumers never write mapping code for it). RunSnapshot still intentionally
+omits `trigger` and `obligation_count` — fetch the run via REST if you need them.
 
 ## Alternatives considered
 - **Shared `common.schema.json` referenced by all three** — DRY, but forces every

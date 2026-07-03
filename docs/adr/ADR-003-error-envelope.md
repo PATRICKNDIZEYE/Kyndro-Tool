@@ -17,7 +17,8 @@ We will return every error as
 `code` is a stable, machine-readable vocabulary (clients branch on it); `message` is
 human-readable and explicitly unstable; `details` is optional structured context
 (e.g. field-level validation errors). One schema (`ErrorEnvelope`) is referenced by
-every 4xx/5xx response in openapi.yaml.
+every documented 4xx response in openapi.yaml, and any 5xx response documented in
+the future must use it too (v1 intentionally documents none).
 
 ## Alternatives considered
 - **RFC 7807 `application/problem+json`** — standard, but the `type`-as-URI

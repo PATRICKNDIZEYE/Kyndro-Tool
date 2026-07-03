@@ -9,7 +9,12 @@
       "status": "completed",
       "head_sha": "9f3c2a71b4de806f5a1c9e2d3b47a0c8e6f1d2a3",
       "base_sha": "4d8e1f2a9c3b7605e4a2d1c8f9b3a7e60d5c4b1a",
-      "pr_number": 42,
+      "pr": {
+        "number": 42,
+        "title": "discounts: allow stacking multiple promotions",
+        "author_login": "mkaneza",
+        "url": "https://github.com/acme/sample-shop/pull/42"
+      },
       "verdict_counts": { "verified": 1, "falsified": 1, "unknown": 1 },
       "created_at": "2026-07-01T09:14:02Z",
       "started_at": "2026-07-01T09:14:11Z",
