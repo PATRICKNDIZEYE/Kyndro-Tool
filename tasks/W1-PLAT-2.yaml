@@ -45,4 +45,4 @@ acceptance:
   - "PR description contains a threat-model paragraph (G-SEC entry requirement)"
 human_gate: G-SEC
 max_attempts: 2
-status: blocked
+status: todo

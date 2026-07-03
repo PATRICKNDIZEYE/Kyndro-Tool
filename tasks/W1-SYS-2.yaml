@@ -33,4 +33,4 @@ acceptance:
      is filed for the human instead"
 human_gate: G-PUB
 max_attempts: 2
-status: blocked
+status: todo

@@ -34,4 +34,4 @@ acceptance:
   - "Verdict chip labels/states exactly match the verdict enum in /contract/openapi.yaml"
 human_gate: G-UX
 max_attempts: 2
-status: blocked
+status: todo

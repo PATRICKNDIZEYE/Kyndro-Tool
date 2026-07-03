@@ -44,4 +44,4 @@ acceptance:
      (demonstrable by toggling the mock layer)"
 human_gate: none
 max_attempts: 2
-status: blocked
+status: todo
