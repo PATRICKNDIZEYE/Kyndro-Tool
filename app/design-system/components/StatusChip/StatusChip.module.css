@@ -1,0 +1,48 @@
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--kyndro-space-2);
+  font-family: var(--kyndro-font-sans);
+  font-size: var(--kyndro-font-size-xs);
+  font-weight: var(--kyndro-font-weight-bold);
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  border-radius: var(--kyndro-radius-pill);
+  border: 1px solid;
+  padding: var(--kyndro-space-1) var(--kyndro-space-3);
+  white-space: nowrap;
+}
+
+.dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: currentColor;
+  flex: none;
+}
+
+.verified {
+  background-color: var(--kyndro-color-verified-bg);
+  color: var(--kyndro-color-verified-fg);
+  border-color: var(--kyndro-color-verified-border);
+}
+
+.falsified {
+  background-color: var(--kyndro-color-falsified-bg);
+  color: var(--kyndro-color-falsified-fg);
+  border-color: var(--kyndro-color-falsified-border);
+}
+
+.unknown {
+  background-color: var(--kyndro-color-unknown-bg);
+  color: var(--kyndro-color-unknown-fg);
+  border-color: var(--kyndro-color-unknown-border);
+}
+
+.boundsHint {
+  font-weight: var(--kyndro-font-weight-regular);
+  text-transform: none;
+  letter-spacing: normal;
+  color: inherit;
+  opacity: 0.75;
+}

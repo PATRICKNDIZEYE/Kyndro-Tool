@@ -1,0 +1,50 @@
+.shell {
+  border: 1px solid var(--kyndro-color-border);
+  border-radius: var(--kyndro-radius-md);
+  overflow: hidden;
+  font-family: var(--kyndro-font-mono);
+  font-size: var(--kyndro-font-size-sm);
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--kyndro-space-2) var(--kyndro-space-4);
+  background-color: var(--kyndro-color-bg-subtle);
+  border-bottom: 1px solid var(--kyndro-color-border);
+  font-family: var(--kyndro-font-sans);
+  font-size: var(--kyndro-font-size-xs);
+  color: var(--kyndro-color-text-muted);
+}
+
+.line {
+  display: flex;
+  white-space: pre;
+}
+
+.lineNumber {
+  flex: none;
+  width: 3rem;
+  text-align: right;
+  padding-right: var(--kyndro-space-3);
+  color: var(--kyndro-color-text-muted);
+  user-select: none;
+}
+
+.lineContent {
+  flex: 1;
+  padding-right: var(--kyndro-space-4);
+}
+
+.added {
+  background-color: var(--kyndro-color-verified-bg);
+}
+
+.removed {
+  background-color: var(--kyndro-color-falsified-bg);
+}
+
+.context {
+  background-color: var(--kyndro-color-bg);
+}

@@ -1,0 +1,63 @@
+/*
+ * Kyndro design tokens — the only source of visual truth (ADR-008).
+ * Never hardcode a hex/px value in a component; reference a token instead.
+ */
+:root {
+  /* Color — neutrals */
+  --kyndro-color-bg: #ffffff;
+  --kyndro-color-bg-subtle: #f6f7f9;
+  --kyndro-color-border: #e2e5ea;
+  --kyndro-color-text: #14161a;
+  --kyndro-color-text-muted: #5b6270;
+
+  /* Color — brand */
+  --kyndro-color-brand: #4f46e5;
+  --kyndro-color-brand-hover: #4338ca;
+  --kyndro-color-brand-contrast: #ffffff;
+
+  /* Color — verdict vocabulary (must match contract Verdict enum exactly) */
+  --kyndro-color-verified-bg: #e8f7ee;
+  --kyndro-color-verified-fg: #146c34;
+  --kyndro-color-verified-border: #a6e3bd;
+  --kyndro-color-falsified-bg: #fdeaea;
+  --kyndro-color-falsified-fg: #9c1c1c;
+  --kyndro-color-falsified-border: #f3b8b8;
+  --kyndro-color-unknown-bg: #f1f2f4;
+  --kyndro-color-unknown-fg: #4b5160;
+  --kyndro-color-unknown-border: #d3d6dc;
+
+  /* Feedback colors (non-verdict, e.g. form/error states) */
+  --kyndro-color-danger: #b3261e;
+  --kyndro-color-danger-bg: #fdeaea;
+
+  /* Typography */
+  --kyndro-font-sans: -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;
+  --kyndro-font-mono: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+  --kyndro-font-size-xs: 0.75rem;
+  --kyndro-font-size-sm: 0.875rem;
+  --kyndro-font-size-md: 1rem;
+  --kyndro-font-size-lg: 1.25rem;
+  --kyndro-font-size-xl: 1.75rem;
+  --kyndro-line-height-tight: 1.25;
+  --kyndro-line-height-normal: 1.5;
+  --kyndro-font-weight-regular: 400;
+  --kyndro-font-weight-medium: 500;
+  --kyndro-font-weight-bold: 700;
+
+  /* Spacing (4px scale) */
+  --kyndro-space-1: 0.25rem;
+  --kyndro-space-2: 0.5rem;
+  --kyndro-space-3: 0.75rem;
+  --kyndro-space-4: 1rem;
+  --kyndro-space-6: 1.5rem;
+  --kyndro-space-8: 2rem;
+
+  /* Radius + elevation */
+  --kyndro-radius-sm: 4px;
+  --kyndro-radius-md: 8px;
+  --kyndro-radius-pill: 999px;
+  --kyndro-shadow-sm: 0 1px 2px rgba(20, 22, 26, 0.08);
+
+  /* Focus ring — every interactive component must use this, never omit :focus-visible */
+  --kyndro-focus-ring: 0 0 0 2px var(--kyndro-color-bg), 0 0 0 4px var(--kyndro-color-brand);
+}

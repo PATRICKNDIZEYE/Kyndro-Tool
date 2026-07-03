@@ -34,4 +34,22 @@ acceptance:
   - "Verdict chip labels/states exactly match the verdict enum in /contract/openapi.yaml"
 human_gate: G-UX
 max_attempts: 2
-status: todo
+status: in_review
+notes: >
+  Built 2026-07-03 in an unattended run (no human present for G-DEP): ADR-008
+  (PROPOSED) covers styling approach (CSS Modules + CSS custom-property tokens)
+  and Storybook as the workbench. All acceptance criteria verified locally:
+  `pnpm exec storybook build` succeeds (zero errors), `pnpm exec eslint components
+  stories --ext .tsx,.ts` (jsx-a11y/recommended) is clean, `pnpm exec tsc --noEmit`
+  is clean. Five components shipped: Button, Table, StatusChip, CodeBlock,
+  DiffViewerShell — each with a default + edge-case story. StatusChip verdict
+  union type is re-exported from tokens/colors.ts (single source of truth) and
+  matches contract/openapi.yaml's Verdict enum exactly. Awaiting G-UX (human
+  accepts ADR-008 + reviews stories) before merge.
+  FLAGGED: diff is ~792 lines excl. pnpm-lock.yaml — over the PLAN.md §4.3 400-line
+  PR cap. This is the first packet to add root workspace tooling (package.json,
+  pnpm-workspace.yaml) alongside all 5 seed components; no CI territory/size check
+  exists yet to have caught this at packet-authoring time (that's W1-PLAT-2, still
+  in flight). Recommend the human either accepts this as a one-time foundational
+  exception or asks for a follow-up packet that splits root-config from component
+  work before future packets use this as precedent.

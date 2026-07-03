@@ -1,0 +1,44 @@
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--kyndro-space-2);
+  font-family: var(--kyndro-font-sans);
+  font-size: var(--kyndro-font-size-sm);
+  font-weight: var(--kyndro-font-weight-medium);
+  line-height: var(--kyndro-line-height-normal);
+  border-radius: var(--kyndro-radius-md);
+  border: 1px solid transparent;
+  padding: var(--kyndro-space-2) var(--kyndro-space-4);
+  cursor: pointer;
+  transition: background-color 120ms ease, border-color 120ms ease;
+}
+
+.button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.button:focus-visible {
+  outline: none;
+  box-shadow: var(--kyndro-focus-ring);
+}
+
+.primary {
+  background-color: var(--kyndro-color-brand);
+  color: var(--kyndro-color-brand-contrast);
+}
+
+.primary:hover:not(:disabled) {
+  background-color: var(--kyndro-color-brand-hover);
+}
+
+.secondary {
+  background-color: var(--kyndro-color-bg);
+  border-color: var(--kyndro-color-border);
+  color: var(--kyndro-color-text);
+}
+
+.secondary:hover:not(:disabled) {
+  background-color: var(--kyndro-color-bg-subtle);
+}

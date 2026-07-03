@@ -3,6 +3,8 @@ node_modules/
 dist/
 build/
 .cache/
+storybook-static/
+*.tsbuildinfo
 
 # secrets — never committed (PLAN.md §6)
 .env

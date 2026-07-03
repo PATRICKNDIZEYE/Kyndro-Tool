@@ -1,0 +1,18 @@
+.pre {
+  margin: 0;
+  padding: var(--kyndro-space-4);
+  background-color: var(--kyndro-color-text);
+  color: var(--kyndro-color-bg);
+  border-radius: var(--kyndro-radius-md);
+  overflow-x: auto;
+  font-family: var(--kyndro-font-mono);
+  font-size: var(--kyndro-font-size-sm);
+  line-height: var(--kyndro-line-height-normal);
+}
+
+.caption {
+  margin: 0 0 var(--kyndro-space-2);
+  font-family: var(--kyndro-font-sans);
+  font-size: var(--kyndro-font-size-xs);
+  color: var(--kyndro-color-text-muted);
+}
