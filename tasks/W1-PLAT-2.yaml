@@ -45,4 +45,140 @@ acceptance:
   - "PR description contains a threat-model paragraph (G-SEC entry requirement)"
 human_gate: G-SEC
 max_attempts: 2
-status: todo
+status: human_gate
+notes: |
+  SHIPPED (branch w1/be-plat-ci-envs, pushed, no PR opened — this session's
+  binding rule is push-only, no PRs; see below):
+
+  ADRs (all PROPOSED, need human ACCEPT):
+    - docs/adr/ADR-011-ci-cd-toolchain.md: GitHub Actions as CI provider,
+      backed by standalone testable Node scripts rather than inline YAML
+      shell logic.
+    - docs/adr/ADR-012-telemetry-approach.md: local NDJSON-file telemetry
+      transport as the v1 stand-in for a real error tracker (same
+      ADR-and-proceed pattern as ADR-010's waitlist storage) — no vendor
+      account/DSN exists, none fabricated.
+    - docs/adr/ADR-013-post-write-linter.md: ESLint as the PostToolUse
+      linter, soft-skipping when no config is discoverable (no package in
+      the repo has one yet as of this packet).
+    - Numbering note: ADR-008/009/010 already exist on other unmerged
+      sibling branches (fe-sys-tokens-components, fe-app-mock-server,
+      fe-sys-landing-waitlist); this packet continues from 011 to avoid
+      re-colliding, but a human will need to renumber when branches merge.
+
+  CI (/infra/ci/):
+    - pipeline.yml: GitHub Actions workflow with the 4 required-check jobs
+      named exactly to match HUMAN-SETUP.md §2's required_status_checks
+      contexts: contract-tests, test-suite, pr-size-check, territory-check.
+      NOT run against a real Actions runner (no network egress in this
+      sandbox) — only the scripts underneath are proven locally.
+    - scripts/check-pr-size.mjs + scripts/check-territory.mjs +
+      scripts/territory-map.mjs: standalone, unit-tested. territory-map.mjs
+      mirrors PLAN.md §3's table; also had to decide root-shared-file and
+      digests/ handling (see "flagged" below).
+    - tests/ (26 tests, all passing): includes seeded-violation fixtures
+      required by acceptance criteria — an oversized diff (401 lines, and a
+      reproduction of W1-APP-1's real 1314-line diff), a cross-territory
+      diff (BE-PLAT touching engine/), a forbidden bash command (force-push,
+      rm -rf, --no-verify), and a fake credential (GitHub PAT pattern, PEM
+      header) caught by the secret scanner.
+
+  Hooks (/infra/hooks/):
+    - pre_tool_use_guard.py, post_tool_use_scan.py: hardened, file-based
+      replacements for HUMAN-SETUP.md §5's inline one-liners. Same
+      patterns, now unit-tested (infra/ci/tests/hooks.test.ts, invoking the
+      real python3 scripts as subprocesses with seeded stdin payloads).
+    - post_tool_use_scan.py adds the linter step (ADR-013): walks up from
+      the touched file for an ESLint config; skips (does not block) if
+      none found, blocks on real lint errors if one is found and
+      `npx eslint` reports failures.
+    - NOT DONE: could not write .claude/settings.json myself — the write
+      was blocked by the Claude Code security classifier as
+      self-modification of protected agent config (and HUMAN-SETUP.md §5/§6
+      already mark pasting that file as human-only). infra/hooks/README.md
+      documents the exact updated JSON block a human needs to paste to wire
+      these scripts in; until then the original inline starter block from
+      HUMAN-SETUP.md keeps running (secret scan only, no lint) — nothing
+      regresses.
+
+  Envs (/infra/envs/):
+    - dev.env.example, staging.env.example: variable NAMES only, matching
+      HUMAN-SETUP.md §3's secret table plus ERROR_TRACKING_DSN's new
+      meaning under ADR-012 (a file: URL in this v1).
+
+  Telemetry (/platform/telemetry/):
+    - index.ts: Transport interface + createTelemetry() (capture/captureError).
+    - transports/local.ts: local NDJSON-file transport per ADR-012, never
+      makes a network call; ERROR_TRACKING_DSN interpreted as a local path
+      only ("file:" prefix, else a repo-relative default).
+    - tests/local-transport.test.ts (6 tests, passing): proves a thrown
+      error is captured end-to-end for both a dev-style and a staging-style
+      file: DSN, plus multi-event append behavior.
+    - PARTIAL: acceptance criteria says "error tracking + tracing" — only
+      error/event tracking is implemented. Distributed tracing (spans
+      across engine/platform) is NOT implemented; it needs a real backend
+      (e.g. OpenTelemetry + a collector) that's a bigger G-DEP conversation
+      than a local stand-in can honestly cover. Flagging as a gap rather
+      than fabricating a fake tracing integration.
+
+  Verification run this session:
+    - pnpm install (root workspace: infra + platform packages) — clean.
+    - pnpm --filter @kyndro/infra test — 3 files, 26/26 passing.
+    - pnpm --filter @kyndro/platform test — 1 file, 6/6 passing.
+    - pnpm --filter @kyndro/platform build (tsc --noEmit) — clean.
+    - node infra/ci/scripts/check-pr-size.mjs origin/main — ran for real
+      against this branch's actual diff, reported correctly.
+    - node infra/ci/scripts/check-territory.mjs origin/main — ran for real;
+      initially caught a real (pre-existing, unrelated to this packet)
+      territory-map gap around /digests/, fixed by adding digests/ to
+      SHARED_PATHS (see flagged below), then passed clean.
+
+  Flagged for human review:
+    - This diff is ~1295 changed lines (excl. lockfile), exceeding the
+      400-line PR cap (PLAN.md §6) — same as W1-SYS-1 (~792) and W1-APP-1
+      (~1314) before it: a from-scratch two-package scaffold (CI scripts +
+      tests + hooks + telemetry + ADRs) rather than an incremental change.
+      The check-pr-size.mjs script this packet ships would itself fail this
+      diff if it ran in real CI — flagging honestly rather than trimming
+      tests/docs just to dodge the check it's introducing.
+    - Root-level shared files (package.json, pnpm-workspace.yaml, etc.) and
+      /tasks/, /digests/ aren't directory-tree territories in PLAN.md §3's
+      table (it only lists directory trees) — territory-map.mjs treats them
+      as shared-by-any-agent. /reviews/ was deliberately NOT added to
+      shared paths (QA-CRITIC/SEC-REV-owned, read-only for others per
+      PLAN.md §3). Please confirm this interpretation is correct.
+    - Root pnpm-workspace.yaml/package.json recreated independently on this
+      branch (4th unmerged branch to do so, alongside
+      fe-sys-tokens-components, fe-app-mock-server,
+      fe-sys-landing-waitlist) — expected collision until a merge order is
+      chosen.
+    - Threat model (G-SEC requirement, normally in a PR description — no PR
+      opened this session per the binding push-only rule, so recorded
+      here): these changes touch /infra/** (explicitly G-SEC-scoped).
+      (1) Two hook scripts run on every Bash/Edit/Write tool call once
+      wired into .claude/settings.json — a bug here would weaken a
+      mechanism PLAN.md §4.3 relies on instead of agent politeness;
+      mitigated by keeping the same regex patterns as the already-reviewed
+      HUMAN-SETUP.md starter block, plus new unit tests for both the allow
+      and block paths. (2) pipeline.yml runs with repo-level Actions
+      permissions once merged; it only invokes local scripts and each
+      package's own test command, adds no third-party Action with elevated
+      permissions, and references no secrets directly. (3) The telemetry
+      transport writes local files only and never makes a network call —
+      it cannot exfiltrate data; ERROR_TRACKING_DSN is only ever read as a
+      local file path in this version. (4) Env-example files list variable
+      NAMES only. (5) Residual risk: post_tool_use_scan.py shells out to
+      `npx eslint <file>` when a config is found; a malicious ESLint config
+      (e.g. via a compromised transitive dependency) could execute code at
+      lint time. Currently dormant — no ESLint config exists anywhere in
+      the repo yet (verified this session) — but a human should review any
+      future package's eslint config/plugins before they start firing.
+    - G-DEP: this packet introduces eslint (referenced, not yet installed
+      anywhere — see ADR-013), vitest/typescript for the two new workspace
+      packages (same tooling already accepted implicitly by prior packets),
+      and GitHub Actions itself (no new account, already using GitHub).
+    - G-SEC and this packet's human_gate are therefore both unresolved,
+      hence status: human_gate rather than done. A human needs to: (a)
+      review/accept ADR-011/012/013, (b) paste the updated hook block from
+      infra/hooks/README.md into .claude/settings.json, (c) decide on the
+      tracing gap above.

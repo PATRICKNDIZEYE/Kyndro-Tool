@@ -134,6 +134,15 @@ Known gaps the starter block does NOT cover (W1-PLAT-2's packet closes them):
 - Exit code 2 blocks the action and feeds stderr back to the agent; test it by asking any
   agent to run `git push --force` against a scratch branch.
 
+**Update (W1-PLAT-2, 2026-07-03):** the linter gap above is now closed — see
+ADR-013 (proposes ESLint, soft-skips when unconfigured) and the hardened,
+unit-tested replacements for the two inline one-liners at
+`infra/hooks/pre_tool_use_guard.py` and `infra/hooks/post_tool_use_scan.py`
+(branch `w1/be-plat-ci-envs`). An agent cannot edit `.claude/settings.json`
+itself (blocked by the security classifier as self-modification of protected
+agent config), so the block above still needs to be re-pasted by a human —
+the updated JSON to paste is in `infra/hooks/README.md`.
+
 ## 6. Multi-agent mode flag
 
 When you're ready to run the full roster as Claude Code Agent Teams (PLAN.md §0 mode 1),

@@ -1,0 +1,67 @@
+# Kyndro CI pipeline. Runs on every PR into main.
+#
+# NOT independently verified against a real GitHub Actions runner in this
+# sandbox (no network egress). The underlying logic of pr-size-check and
+# territory-check is proven locally instead — see infra/ci/tests/ and
+# infra/ci/scripts/*.mjs, which are unit-tested with seeded violation
+# fixtures. A human should confirm this workflow triggers correctly on the
+# first real PR (see ADR-011).
+name: kyndro-ci
+
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  contract-tests:
+    name: Contract tests (both directions)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Provider-side contract tests (BE-PLAT)
+        run: pnpm --filter @kyndro/contract test
+      - name: Consumer-side contract tests (FE-APP)
+        run: pnpm --filter @kyndro/app test -- contract
+
+  test-suite:
+    name: Full test suite
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm -r test
+
+  pr-size-check:
+    name: PR size check (max 400 changed lines)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: node infra/ci/scripts/check-pr-size.mjs origin/${{ github.base_ref }}
+
+  territory-check:
+    name: Territory check (diff paths must be subset of owner's territory)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: node infra/ci/scripts/check-territory.mjs origin/${{ github.base_ref }}

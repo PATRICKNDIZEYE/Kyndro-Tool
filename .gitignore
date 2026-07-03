@@ -16,3 +16,10 @@ build/
 General.MD
 General.MDes
 Guide.MDes
+
+# local telemetry sink (ADR-012) — never committed, it's a local dev log
+infra/tmp/
+
+# python bytecode cache from running the hook scripts
+__pycache__/
+*.pyc
